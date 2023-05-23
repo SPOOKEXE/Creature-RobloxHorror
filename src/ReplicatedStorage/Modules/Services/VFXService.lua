@@ -189,6 +189,42 @@ function Module:CreateFlyingFireTrails( Position, Count, Speed, Direction, Sprea
 	Direction = Direction or Vector3.new(0, 1, 0)
 	Spread = Spread or 0.4
 
+	local RockDirectionCF = CFrame.lookAt( Position, Position + Direction.Unit )
+	local FIRE_PART = ReplicatedAssets.Effects.FirePart:Clone()
+	FIRE_PART.Anchored = false
+	FIRE_PART.CanCollide = true
+	FIRE_PART.CanTouch = false
+	FIRE_PART.CanQuery = false
+	FIRE_PART.Massless = true
+
+	local RayResult = workspace:Raycast( Position + Vector3.new(0, 3, 0), Vector3.new(0, -8, 0), IgnoreParams )
+
+	local WeightMultiplier = workspace.Gravity / (1/FIRE_PART:GetMass())
+	local RockSpeed = math.min(Speed * WeightMultiplier, Speed + 30)
+
+	local RockInstances = {}
+	for _ = 1, Count do
+		local DirectionVector = GetSpreadVector( RockDirectionCF, Spread ).LookVector
+
+		local BlockRockInstance = FIRE_PART:Clone()
+		BlockRockInstance.Position = RayResult and RayResult.Position or Position
+		BlockRockInstance.Velocity = DirectionVector * RockSpeed
+		BlockRockInstance.Parent = VFXFolder
+		table.insert(RockInstances, BlockRockInstance)
+	end
+
+	FIRE_PART:Destroy()
+	task.delay(3.5, function()
+		for i = 0, 1, 0.01 do
+			for _, RockPart in ipairs( RockInstances ) do
+				RockPart.FireParticle.Transparency = NumberSequence.new(i)
+			end
+			task.wait()
+		end
+	end)
+
+	return RockInstances
+
 end
 
 function Module:CreateExplosionFireballParticles( Position )
