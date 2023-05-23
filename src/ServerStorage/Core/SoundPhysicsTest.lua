@@ -13,9 +13,11 @@ local Module = {}
 function Module:Start()
 
 	task.defer(function()
+		local DelayTimer = 2
 		while true do
-			task.wait(1)
-			VFXPresetService:CreateArtilleryBlast( Vector3.new(0, 5, 0) )
+			task.wait(DelayTimer)
+			VFXPresetService:CreateArtilleryBlast( Vector3.new(0, 1, 0) )
+			DelayTimer = 3
 		end
 	end)
 
