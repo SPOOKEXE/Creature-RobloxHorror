@@ -1,3 +1,4 @@
+local Debris = game:GetService('Debris')
 local Players = game:GetService('Players')
 local TweenService = game:GetService('TweenService')
 
@@ -103,16 +104,16 @@ function Module:CreateRockCrater( Position, CircularRockCount, Radius, Duration 
 	end)
 end
 
-function Module:CreateFlyingRockDebris( Position, RockCount, RockSpeed, RockSize, RockDirection, RockSpread )
+function Module:CreateFlyingRockDebris( Position, Count, Speed, Size, Direction, Spread )
 	assert( typeof(Position) == "Vector3", "Passed Position must be a Vector3." )
 
-	RockCount = RockCount or 12
-	RockSpeed = RockSpeed or 30
-	RockSize = RockSize or Vector3.new(1.45, 1.45, 1.45)
-	RockDirection = RockDirection or Vector3.new(0, 1, 0)
-	RockSpread = RockSpread or 0.35
+	Count = Count or 12
+	Speed = Speed or 40
+	Size = Size or Vector3.new(1.15, 1.15, 1.15)
+	Direction = Direction or Vector3.new(0, 1, 0)
+	Spread = Spread or 0.4
 
-	local RockDirectionCF = CFrame.lookAt( Position, Position + RockDirection.Unit )
+	local RockDirectionCF = CFrame.lookAt( Position, Position + Direction.Unit )
 	local BLOCK_ROCKY_PART = ReplicatedAssets.Models.BlockyRock:Clone()
 	BLOCK_ROCKY_PART.Anchored = false
 	BLOCK_ROCKY_PART.CanCollide = true
@@ -128,16 +129,16 @@ function Module:CreateFlyingRockDebris( Position, RockCount, RockSpeed, RockSize
 	end
 
 	local WeightMultiplier = workspace.Gravity / (1/BLOCK_ROCKY_PART:GetMass())
-	local Speed = math.min(RockSpeed * WeightMultiplier, RockSpeed + 30)
+	local RockSpeed = math.min(Speed * WeightMultiplier, Speed + 30)
 
 	local RockInstances = {}
-	for _ = 1, RockCount do
-		local DirectionVector = GetSpreadVector( RockDirectionCF, RockSpread ).LookVector
+	for _ = 1, Count do
+		local DirectionVector = GetSpreadVector( RockDirectionCF, Spread ).LookVector
 
 		local BlockRockInstance = BLOCK_ROCKY_PART:Clone()
-		BlockRockInstance.Position = Position
-		BlockRockInstance.Size = RockSize
-		BlockRockInstance.Velocity = DirectionVector * Speed
+		BlockRockInstance.Position = RayResult and RayResult.Position or Position
+		BlockRockInstance.Size = Size
+		BlockRockInstance.Velocity = DirectionVector * RockSpeed
 		BlockRockInstance.Parent = VFXFolder
 		table.insert(RockInstances, BlockRockInstance)
 	end
@@ -159,14 +160,12 @@ function Module:CreateFlyingRockDebrisWithTrail(...)
 	-- clone all the particles in each rock
 	local ParticleEffects = { }
 	for _, RockInstance in ipairs( RockInstances ) do
-
 		local Att0 = Instance.new('Attachment')
 		Att0.Position = Vector3.new(0, 0.2, 0)
 		Att0.Parent = RockInstance
 		local Att1 = Instance.new('Attachment')
 		Att1.Position = Vector3.new(0, -0.2, 0)
 		Att1.Parent = RockInstance
-
 		local Effect = ReplicatedAssets.Effects.DustTrail:Clone()
 		Effect.Attachment0 = Att0
 		Effect.Attachment1 = Att1
@@ -182,8 +181,27 @@ function Module:CreateFlyingRockDebrisWithTrail(...)
 	end)
 end
 
-function Module:CreateExplosionParticles( Position )
+function Module:CreateFlyingFireTrails( Position, Count, Speed, Direction, Spread )
+	assert( typeof(Position) == "Vector3", "Passed Position must be a Vector3." )
 
+	Count = Count or 6
+	Speed = Speed or 30
+	Direction = Direction or Vector3.new(0, 1, 0)
+	Spread = Spread or 0.4
+
+end
+
+function Module:CreateExplosionFireballParticles( Position )
+	-- create the particle attachment
+	local Att0 = Instance.new('Attachment')
+	Att0.WorldPosition = Position
+	Att0.Parent = workspace.Terrain
+	-- explosion fireball particle emitter
+	local ExplosionFireball = ReplicatedAssets.Effects.ExplosionFireball:Clone()
+	ExplosionFireball.Parent = Att0
+	ExplosionFireball:Emit(10)
+	-- debris the particle emitter
+	Debris:AddItem(Att0, ExplosionFireball.Lifetime.Max)
 end
 
 return Module

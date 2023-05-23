@@ -11,11 +11,11 @@ local SystemsContainer = {}
 local Module = {}
 
 function Module:CreateArtilleryBlast( Position )
-	print('Artillery Explosion @ ', Position)
 	-- create vfx
 	VFXService:CreateRockCrater( Position )
 	VFXService:CreateFlyingRockDebrisWithTrail( Position )
-	VFXService:CreateExplosionParticles( Position )
+	VFXService:CreateExplosionFireballParticles( Position )
+	VFXService:CreateFlyingFireTrails( Position )
 	-- play sounds
 	SoundPhysicsService:PlayPresetEffect('ArtilleryExplosion', Position)
 end
