@@ -12,6 +12,8 @@ local MaterialDampeningValues = {
 	Default = 0.8, -- 20% reduction
 }
 
+local SCATTER_RAY_COUNT = 4
+
 local RayDirectionVectors = { } do
 	local function map(value, istart, istop, ostart, ostop)
 		return ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
@@ -86,6 +88,10 @@ local Module = {}
 
 function Module:GetMaterialDampeningValue( MaterialName )
 	return GetMaterialDampenValue( MaterialName )
+end
+
+function Module:RecursiveSoundWaveRaycast( Position, Direction, SoundInstance, SoundData )
+
 end
 
 function Module:PlaySoundData( SoundInstance, SoundData, Position )
